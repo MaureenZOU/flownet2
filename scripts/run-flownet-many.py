@@ -8,29 +8,20 @@ from scipy import misc
 import caffe
 import tempfile
 from math import ceil
+import numpy as np
 
 parser = argparse.ArgumentParser()
-parser.add_argument('caffemodel', help='path to model')
-parser.add_argument('deployproto', help='path to deploy prototxt template')
-parser.add_argument('listfile', help='one line should contain paths "img0.ext img1.ext out.flo"')
 parser.add_argument('--gpu',  help='gpu id to use (0, 1, ...)', default=0, type=int)
 parser.add_argument('--verbose',  help='whether to output all caffe logging', action='store_true')
 
 args = parser.parse_args()
 
-if(not os.path.exists(args.caffemodel)): raise BaseException('caffemodel does not exist: '+args.caffemodel)
-if(not os.path.exists(args.deployproto)): raise BaseException('deploy-proto does not exist: '+args.deployproto)
-if(not os.path.exists(args.listfile)): raise BaseException('listfile does not exist: '+args.listfile)
+''' Experiment Setting '''
+caffemodel_pth = '/home/xueyan/flownet2/models/FlowNet2/FlowNet2_weights.caffemodel.h5'
+deployproto_pth = '/home/xueyan/flownet2/models/FlowNet2/FlowNet2_deploy.prototxt.template'
+file_lst = '/home/xueyan/flownet2/datasets/tennis.npy'
 
-def readTupleList(filename):
-    list = []
-    for line in open(filename).readlines():
-        if line.strip() != '':
-            list.append(line.split())
-
-    return list
-
-ops = readTupleList(args.listfile)
+ops = np.load(file_lst)
 
 width = -1
 height = -1
@@ -64,7 +55,7 @@ for ent in ops:
 
         tmp = tempfile.NamedTemporaryFile(mode='w', delete=False)
 
-        proto = open(args.deployproto).readlines()
+        proto = open(deployproto_pth).readlines()
         for line in proto:
             for key, value in vars.items():
                 tag = "$%s$" % key
@@ -78,7 +69,7 @@ for ent in ops:
         caffe.set_logging_disabled()
     caffe.set_device(args.gpu)
     caffe.set_mode_gpu()
-    net = caffe.Net(tmp.name, args.caffemodel, caffe.TEST)
+    net = caffe.Net(tmp.name, caffemodel_pth, caffe.TEST)
 
     input_dict = {}
     for blob_idx in range(num_blobs):
@@ -87,7 +78,7 @@ for ent in ops:
     #
     # There is some non-deterministic nan-bug in caffe
     #
-    print('Network forward pass using %s.' % args.caffemodel)
+    print('Network forward pass using %s.' % caffemodel_pth)
     i = 1
     while i<=5:
         i+=1

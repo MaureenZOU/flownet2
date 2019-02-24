@@ -77,7 +77,6 @@ print('Network forward pass using %s.' % args.caffemodel)
 i = 1
 while i<=5:
     i+=1
-
     net.forward(**input_dict)
 
     containsNaN = False
