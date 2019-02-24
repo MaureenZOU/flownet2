@@ -1,6 +1,16 @@
 Caffe for FlowNet2 
 ==================
 
+## Xueyan's Scripts
+
+```python
+cd scripts
+python3 gen_lst.py #generate .npy file stores [[imgi_t_pth, imgi_t+1_pth, imgi_flo_pth] .. ]
+python3 run-flownet-many.py #don't forget to edit Experiment Setting before you run the program
+python3 visual_flo.py #visualize all the flo in ../results file
+```
+
+
 This is the release of:
  - the CVPR 2017 version of FlowNet2.0
 
